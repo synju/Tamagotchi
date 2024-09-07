@@ -6,6 +6,7 @@ import json
 import datetime
 import platform
 import tweepy
+import threading
 
 
 class Tamagotchi:
@@ -20,6 +21,7 @@ class Tamagotchi:
 	STATE_SLEEPING = 8
 
 	DECAY_INTERVAL = 60 * 60  # 60 Minutes
+
 	# DECAY_INTERVAL = 5 * 60  # 5 Minutes
 	# DECAY_INTERVAL = 1 * 60  # 1 Minute
 	# DECAY_INTERVAL = 1 * 10  # 10 Seconds
@@ -57,8 +59,7 @@ class Tamagotchi:
 		try:
 			response = client.create_tweet(text=tweet)
 		except Exception as e:
-			print(str(e))
-			sys.exit()
+			print(str(e))	# sys.exit()
 
 	def load_tweets(self, filename):
 		# Load tweets from a JSON file and return them as a list.
@@ -78,15 +79,40 @@ class Tamagotchi:
 		with open(filename, 'w') as file:
 			json.dump(tweets, file)
 
+	def get_twitter_username(self):
+		# Bearer token
+		bearer_token = "AAAAAAAAAAAAAAAAAAAAAAvQowEAAAAANEgvbSUz9ePm4wm1GQlCqs%2BO%2B3c%3Dkb8xTZIK5zxFfDl7ywVk0MWSwIwe4bD2B0dPhp09JRVqx9Ohzu"
+
+		# Define keys
+		consumer_key = "TSxot5ao01PooO73teabMlNr2"
+		consumer_secret = "v9dz6mP5bMZrJVyylGtugcKoVfozvYgy8ZrDEO1lJRO40KDzLe"
+
+		# Access
+		access_token = "1682725687260487681-c9ak4H2Bb0z3QovxH9LEMS1dssf0eJ"
+		access_token_secret = "adYOGyStHrybIQhRMSrlSLfKYHKbLfSx8vI688lta1bqn"
+
+		client = tweepy.Client(bearer_token, consumer_key, consumer_secret, access_token, access_token_secret)
+
+		try:
+			# Fetch the authenticated user
+			user_info = client.get_me()
+			print(f"Twitter Bot Username: @{user_info.data.username}")
+		except Exception as e:
+			print(f"Failed to get Twitter username: {str(e)}")
+
+		time.sleep(5)
+
 	def do_something_fun(self):
-		default_tweet = "Having a great time with my Tamagotchi! #Tamagotchi #FunTime"
+		default_tweet = "Having a great time with my Tamagotchi! #Tamagotchi #FunTimes"
 		if self.happiness < 4:
 			tweets = self.load_tweets("tweets.json")
 			if not tweets:  # Check if the list is empty
 				print("Posted a tweet:", default_tweet)
 			else:
 				tweet = random.choice(tweets)
-				self.post_tweet(tweet)
+				# Start a new thread to post the tweet
+				tweet_thread = threading.Thread(target=self.post_tweet, args=(tweet,))
+				tweet_thread.start()
 
 			print("Posted a tweet:", tweet)
 			self.happiness += 1
@@ -125,6 +151,15 @@ class Tamagotchi:
 		self.load_stats()
 		if len(self.name) == 0:
 			self.set_name(input("Enter a name for your Tamagotchi: "))
+
+		# Print the Twitter bot's username
+		# self.get_twitter_username()
+
+		# Start the background thread to refresh the display every minute
+		refresh_thread = threading.Thread(target=self.refresh_display_periodically)
+		refresh_thread.daemon = True  # Ensure the thread exits when the main program exits
+		refresh_thread.start()
+
 		self.process_input()
 
 	def save_stats(self):
@@ -136,7 +171,7 @@ class Tamagotchi:
 
 		# Create the data dictionary
 		data = {'name': self.name,  # Add this line to save the name
-			'health': self.health, 'hunger': self.hunger, 'happiness': self.happiness, 'hygiene': self.hygiene, 'age': self.age, 'saveTime': self.save_time, 'lastDecayTime': self.last_decay_time, 'creationDateTime': self.creation_date_and_time, 'sleeping': self.sleeping, 'lastUpdated': self.last_updated, }
+						'health': self.health, 'hunger': self.hunger, 'happiness': self.happiness, 'hygiene': self.hygiene, 'age': self.age, 'saveTime': self.save_time, 'lastDecayTime': self.last_decay_time, 'creationDateTime': self.creation_date_and_time, 'sleeping': self.sleeping, 'lastUpdated': self.last_updated, }
 
 		# Save the data to the file
 		with open(save_path, 'w') as file:
@@ -192,6 +227,14 @@ class Tamagotchi:
 
 	def set_name(self, name):
 		self.name = name
+
+	def refresh_display_periodically(self):
+		time.sleep(60)  # Wait for 60 seconds before first refresh
+
+		# This function runs in a separate thread and refreshes the display every minute.
+		while True:
+			self.process_input()  # Call process_input to refresh the display
+			time.sleep(60)  # Wait for 60 seconds before refreshing again
 
 	def decay(self):
 		current_time = self.get_current_time_ms()
@@ -297,13 +340,18 @@ class Tamagotchi:
 		current_time = self.get_current_time_ms()
 		elapsed_time = current_time - self.creation_date_and_time
 		age_timedelta = datetime.timedelta(milliseconds=elapsed_time)
-		age_str = str(age_timedelta)
 
-		days = age_timedelta.days
+		years, remainder = divmod(age_timedelta.days, 365)
+		months, days = divmod(remainder, 30)  # Simplified calculation, ignoring leap years and variations in month lengths.
 		hours, remainder = divmod(age_timedelta.seconds, 3600)
 		minutes, seconds = divmod(remainder, 60)
 
 		age_parts = []
+
+		if years > 0:
+			age_parts.append(f"{years} year{'s' if years != 1 else ''}")
+		if months > 0:
+			age_parts.append(f"{months} month{'s' if months != 1 else ''}")
 		if days > 0:
 			age_parts.append(f"{days} day{'s' if days != 1 else ''}")
 		if hours > 0:
@@ -317,12 +365,11 @@ class Tamagotchi:
 		print("Age:", age_str)
 
 	def print_menu_state(self):
-		print("1. Stats")
-		print("2. Feed")
-		print("3. Do Something Fun!!!")
-		print("4. Clean")
-		print("5. Medicine")
-		print("6. Save & Exit")
+		print("1. Feed")
+		print("2. Do Something Fun!!!")
+		print("3. Clean")
+		print("4. Medicine")
+		print("5. Save & Exit")
 
 	def print_decay_details(self):
 		# Last Updated
@@ -376,16 +423,6 @@ class Tamagotchi:
 				remaining_time_str = tomorrow_nine_am.strftime("Tomorrow %I:%M%p")
 
 			print("Next Update:", remaining_time_str)
-
-	def print_stats_state(self):
-		self.print_decay_details()
-
-		self.print_health_bar()
-		self.print_hunger_bar()
-		self.print_hygiene_bar()
-		self.print_happiness_bar()
-
-		print("1. Back")
 
 	def print_feed_state(self):
 		self.print_hunger_bar()
@@ -455,6 +492,13 @@ class Tamagotchi:
 		self.print_name()
 		self.print_age()
 
+		# Always stats and decay details.
+		self.print_decay_details()
+		self.print_health_bar()
+		self.print_hunger_bar()
+		self.print_hygiene_bar()
+		self.print_happiness_bar()
+
 		# Check if sleeping...
 		if self.is_sleeping():
 			self.state = self.STATE_SLEEPING
@@ -462,8 +506,6 @@ class Tamagotchi:
 		# Other States...
 		if self.state == self.STATE_MENU:
 			self.print_menu_state()
-		elif self.state == self.STATE_STATS:
-			self.print_stats_state()
 		elif self.state == self.STATE_FEED:
 			self.print_feed_state()
 		elif self.state == self.STATE_PLAY:
@@ -484,8 +526,12 @@ class Tamagotchi:
 			self.decay()
 		self.display_state()
 
+		# Ensure the "Select an action:" prompt always remains
+		if self.state == self.STATE_MENU:
+			print("Select an action: ", end="")
+
 		# Get Input
-		user_input = input("Select an action: ")
+		user_input = input()
 		if user_input.strip() != "":
 			try:
 				self.action = int(user_input)
@@ -500,25 +546,16 @@ class Tamagotchi:
 		if self.is_valid_integer(self.action):
 			# MENU
 			if self.state == self.STATE_MENU:
-				if self.action == 1:  # 1. Stats
-					self.state = self.STATE_STATS
-				if self.action == 2:  # 2. Feed
+				if self.action == 1:  # 1. Feed
 					self.state = self.STATE_FEED
-				if self.action == 3:  # 3. Play
+				if self.action == 2:  # 2. Play
 					self.state = self.STATE_PLAY
-				if self.action == 4:  # 4. Clean
+				if self.action == 3:  # 3. Clean
 					self.state = self.STATE_CLEAN
-				if self.action == 5:  # 5. Medicine
+				if self.action == 4:  # 4. Medicine
 					self.state = self.STATE_MEDICINE
-				if self.action == 6:  # 6. Save & Exit
+				if self.action == 5:  # 5. Save & Exit
 					self.state = self.STATE_EXIT
-				self.save_stats()
-				self.process_input()
-
-			# STATS
-			if self.state == self.STATE_STATS:
-				if self.action == 1:  # 1. Back
-					self.state = self.STATE_MENU
 				self.save_stats()
 				self.process_input()
 
@@ -535,7 +572,7 @@ class Tamagotchi:
 						time.sleep(1)
 					self.print_hunger_bar()
 				if self.action == 2:  # 2. Back
-					self.state = self.STATE_STATS
+					self.state = self.STATE_MENU
 				self.save_stats()
 				self.process_input()
 
@@ -544,7 +581,7 @@ class Tamagotchi:
 				if self.action == 1:  # 1. Do something fun...
 					self.do_something_fun()
 				if self.action == 2:  # 2. Back
-					self.state = self.STATE_STATS
+					self.state = self.STATE_MENU
 				self.save_stats()
 				self.process_input()
 
@@ -556,7 +593,7 @@ class Tamagotchi:
 					self.hygiene = 4
 					self.update_last_updated()
 				if self.action == 2:  # 2. Back
-					self.state = self.STATE_STATS
+					self.state = self.STATE_MENU
 				self.save_stats()
 				self.process_input()
 
@@ -572,7 +609,7 @@ class Tamagotchi:
 						print("At full health already...")
 						time.sleep(1)
 				if self.action == 2:  # 2. Back
-					self.state = self.STATE_STATS
+					self.state = self.STATE_MENU
 				self.save_stats()
 				self.process_input()
 
