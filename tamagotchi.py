@@ -554,7 +554,6 @@ class Tamagotchi:
 		self.print_hunger_bar()
 		self.update_last_updated()
 		self.save_stats()
-		self.process_input()
 
 	def clean(self):
 		self.check_and_update_from_json()
@@ -563,14 +562,12 @@ class Tamagotchi:
 		self.hygiene = 4
 		self.update_last_updated()
 		self.save_stats()
-		self.process_input()
 
 	def play(self):
 		self.check_and_update_from_json()
 		self.do_something_fun()
 		self.update_last_updated()
 		self.save_stats()
-		self.process_input()
 
 	def give_medicine(self):
 		self.check_and_update_from_json()
@@ -584,7 +581,6 @@ class Tamagotchi:
 			time.sleep(1)
 		self.update_last_updated()
 		self.save_stats()
-		self.process_input()
 
 	# Process Input
 	def process_input(self):
@@ -631,6 +627,7 @@ class Tamagotchi:
 					self.feed()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
+				self.process_input()
 
 			# PLAY
 			if self.state == self.STATE_PLAY:
@@ -638,6 +635,7 @@ class Tamagotchi:
 					self.play()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
+				self.process_input()
 
 			# CLEAN
 			if self.state == self.STATE_CLEAN:
@@ -645,6 +643,7 @@ class Tamagotchi:
 					self.clean()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
+				self.process_input()
 
 			# MEDICINE
 			if self.state == self.STATE_MEDICINE:
@@ -652,6 +651,7 @@ class Tamagotchi:
 					self.give_medicine()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
+				self.process_input()
 
 			# DEATH
 			if self.state == self.STATE_DEATH:
