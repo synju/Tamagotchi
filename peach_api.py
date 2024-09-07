@@ -22,7 +22,18 @@ class TamagotchiAPI:
 def get_status():
     global tamagotchi_instance
     if tamagotchi_instance:
-        status = {'name': tamagotchi_instance.name, 'health': tamagotchi_instance.health, 'hunger': tamagotchi_instance.hunger, 'happiness': tamagotchi_instance.happiness, 'hygiene': tamagotchi_instance.hygiene, 'age': tamagotchi_instance.age, 'sleeping': tamagotchi_instance.sleeping}
+        status = {
+            'name': tamagotchi_instance.name,
+            'health': tamagotchi_instance.health,
+            'hunger': tamagotchi_instance.hunger,
+            'happiness': tamagotchi_instance.happiness,
+            'hygiene': tamagotchi_instance.hygiene,
+            'age': tamagotchi_instance.age,
+            'sleeping': tamagotchi_instance.sleeping,
+            'pc_vars': {
+                'volume': tamagotchi_instance.pc_volume,
+            }
+        }
         return jsonify(status)
     else:
         return jsonify({"error": "Tamagotchi instance not found"}), 500

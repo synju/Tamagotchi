@@ -42,6 +42,11 @@ class Tamagotchi:
 		self.creation_date_and_time = self.get_current_time_ms()
 		self.sleeping = self.is_sleeping()
 		self.last_updated = self.get_current_time_ms()
+
+		# pc_vars
+		self.pc_vars = {}
+		self.pc_volume = 1
+
 		self.api = TamagotchiAPI(self)  # Pass the current Tamagotchi instance to API
 		threading.Thread(target=self.api.start_api, daemon=True).start()  # Start API in another thread
 
@@ -148,8 +153,22 @@ class Tamagotchi:
 		save_path = os.path.join(current_dir, 'tamagotchi_stats.json')
 
 		# Create the data dictionary
-		data = {'name': self.name,  # Add this line to save the name
-						'health': self.health, 'hunger': self.hunger, 'happiness': self.happiness, 'hygiene': self.hygiene, 'age': self.age, 'saveTime': self.save_time, 'lastDecayTime': self.last_decay_time, 'creationDateTime': self.creation_date_and_time, 'sleeping': self.sleeping, 'lastUpdated': self.last_updated, }
+		data = {
+			'name': self.name,  # Add this line to save the name
+			'health': self.health,
+			'hunger': self.hunger,
+			'happiness': self.happiness,
+			'hygiene': self.hygiene,
+			'age': self.age,
+			'saveTime': self.save_time,
+			'lastDecayTime': self.last_decay_time,
+			'creationDateTime': self.creation_date_and_time,
+			'sleeping': self.sleeping,
+			'lastUpdated': self.last_updated,
+			'pc_vars': {
+				'volume': self.pc_volume,
+			},
+		}
 
 		# Save the data to the file
 		with open(save_path, 'w') as file:
@@ -183,6 +202,10 @@ class Tamagotchi:
 		self.creation_date_and_time = data.get('creationDateTime', self.creation_date_and_time)
 		self.sleeping = data.get('sleeping', self.sleeping)
 		self.last_updated = data.get('lastUpdated', self.last_updated)  # Add this line to load last_updated
+
+		# Load pc_vars if it exists
+		self.pc_vars = data.get('pc_vars', {})
+		self.pc_volume = self.pc_vars.get('volume', 1)
 
 		# Update sleeping state during daytime
 		if not self.is_sleeping():

@@ -1,1 +1,13 @@
-{"name": "Peach", "health": 4, "hunger": 4.0, "happiness": 4.0, "hygiene": 4, "age": 67.0, "saveTime": 1689885446794, "lastDecayTime": 1725706545941.0, "creationDateTime": 1689927799432, "sleeping": false, "lastUpdated": 1725705904628}
+{
+  "name": "Peach",
+  "health": 4,
+  "hunger": 4.0,
+  "happiness": 4.0,
+  "hygiene": 4,
+  "age": 67.0,
+  "saveTime": 1689885446794,
+  "lastDecayTime": 1725706545941.0,
+  "creationDateTime": 1689927799432,
+  "sleeping": false,
+  "lastUpdated": 1725705904628
+}
