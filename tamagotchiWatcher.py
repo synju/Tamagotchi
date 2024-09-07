@@ -25,7 +25,7 @@ def get_tamagotchi_status():
 
 # Function to check and adjust PC volume
 def adjust_pc_volume():
-	global last_known_volume  # Use the global variable to track last known volume
+	global last_known_volume
 	status = get_tamagotchi_status()
 	if status:
 		volume = status.get('pc_vars', {}).get('volume', 1)  # Default volume to 1 if not found
@@ -41,13 +41,9 @@ def adjust_pc_volume():
 
 			# Update the last known volume
 			last_known_volume = volume
-		else:
-			print(f"Volume already set to {volume}. No changes needed.")
 
 
 if __name__ == "__main__":
-	# Continuous loop to run the function every 5 seconds
 	while True:
-		print("Awaiting instructions...")
 		adjust_pc_volume()
 		time.sleep(5)  # Wait for 5 seconds before running the function again
