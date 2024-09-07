@@ -117,19 +117,20 @@ class Tamagotchi:
 				# Start a new thread to post the tweet
 				tweet_thread = threading.Thread(target=self.post_tweet, args=(tweet,))
 				tweet_thread.start()
-
-			if not silent:
-				print("Posted a tweet:", tweet)
+				if not silent:
+					print("Posted a tweet:", tweet)
 			self.happiness += 1
 			if not silent:
 				self.print_happiness_bar()
 			time.sleep(5)
 		else:
-			print(default_tweet)
+			if not silent:
+				print(default_tweet)
 			if self.happiness < 4:
 				self.happiness += 1
 				self.update_last_updated()
-			self.print_happiness_bar()
+			if not silent:
+				self.print_happiness_bar()
 			time.sleep(1)
 		self.save_stats()  # Add this line to save the stats after performing the action
 
