@@ -105,19 +105,21 @@ class Tamagotchi:
 
 		time.sleep(5)
 
-	def do_something_fun(self):
+	def do_something_fun(self, silent=False):
 		default_tweet = "Having a great time with my Tamagotchi! #Tamagotchi #FunTimes"
 		if self.happiness < 4:
 			tweets = self.load_tweets("tweets.json")
 			if not tweets:  # Check if the list is empty
-				print("Posted a tweet:", default_tweet)
+				if not silent:
+					print("Posted a tweet:", default_tweet)
 			else:
 				tweet = random.choice(tweets)
 				# Start a new thread to post the tweet
 				tweet_thread = threading.Thread(target=self.post_tweet, args=(tweet,))
 				tweet_thread.start()
 
-			print("Posted a tweet:", tweet)
+			if not silent:
+				print("Posted a tweet:", tweet)
 			self.happiness += 1
 			self.print_happiness_bar()
 			time.sleep(5)
@@ -541,38 +543,42 @@ class Tamagotchi:
 		except json.JSONDecodeError:
 			print("Error reading the JSON file.")
 
-	def feed(self):
+	def feed(self, silent=False):
 		self.check_and_update_from_json()
 		if self.hunger < 4:
-			print("Feeding...")
+			if not silent:
+				print("Feeding...")
 			time.sleep(1)
 			self.hunger += 1
 			self.update_last_updated()
 		else:
-			print("Can't eat anymore...")
+			if not silent:
+				print("Can't eat anymore...")
 			time.sleep(1)
 		self.print_hunger_bar()
 		self.update_last_updated()
 		self.save_stats()
 
-	def clean(self):
+	def clean(self, silent=False):
 		self.check_and_update_from_json()
-		print("Cleaning...")
+		if not silent:
+			print("Cleaning...")
 		time.sleep(1)
 		self.hygiene = 4
 		self.update_last_updated()
 		self.save_stats()
 
-	def play(self):
+	def play(self, silent=False):
 		self.check_and_update_from_json()
-		self.do_something_fun()
+		self.do_something_fun(silent)
 		self.update_last_updated()
 		self.save_stats()
 
-	def give_medicine(self):
+	def give_medicine(self, silent=False):
 		self.check_and_update_from_json()
 		if self.health < 4:
-			print("Giving medicine...")
+			if not silent:
+				print("Giving medicine...")
 			self.health = 4
 		else:
 			print("At full health already...")

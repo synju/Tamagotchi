@@ -1,6 +1,11 @@
+import logging
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+
+# Suppress Flask (werkzeug) logs
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 # Initialize Tamagotchi instance globally
 tamagotchi_instance = None  # This will hold the reference to the Tamagotchi instance
@@ -33,12 +38,12 @@ def perform_action():
 
 	if tamagotchi_instance and action:
 		if action == 'feed':
-			tamagotchi_instance.feed()
+			tamagotchi_instance.feed(silent=True)
 		elif action == 'clean':
-			tamagotchi_instance.clean()
+			tamagotchi_instance.clean(silent=True)
 		elif action == 'play':
-			tamagotchi_instance.play()
-		elif action == 'medicine':  # Added medicine action
-			tamagotchi_instance.give_medicine()
+			tamagotchi_instance.play(silent=True)
+		elif action == 'medicine':
+			tamagotchi_instance.give_medicine(silent=True)
 		return jsonify({'message': f'Action {action} performed'})
 	return jsonify({'message': 'Invalid action'}), 400
