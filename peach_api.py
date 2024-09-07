@@ -11,7 +11,7 @@ class TamagotchiAPI:
 
 	def start_api(self):
 		# Start the Flask server (could be threaded later)
-		app.run(debug=False, port=5000)
+		app.run(host='0.0.0.0', port=5000)
 
 
 @app.route('/status', methods=['GET'])
