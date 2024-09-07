@@ -445,7 +445,7 @@ class Tamagotchi:
 		print("2. Back")
 
 	def print_death_state(self):
-		print(f"Your Tamagotchi is dead")
+		print(f"Your Tamagotchi is dead. How could you let that happen, what is wrong with you?")
 		print("1. Restart")
 		print("2. Exit")
 
