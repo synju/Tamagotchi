@@ -7,6 +7,7 @@ import datetime
 import platform
 import tweepy
 import threading
+import requests
 from peach_api import TamagotchiAPI
 
 
@@ -444,7 +445,7 @@ class Tamagotchi:
 		self.save_stats()
 		print("Saving and exiting...")
 		time.sleep(1)
-		sys.exit()
+		exit()
 
 	def print_name(self):
 		if len(self.name) > 0:
@@ -662,6 +663,22 @@ class Tamagotchi:
 			if self.state == self.STATE_SLEEPING:
 				if self.action == 1:  # 1. Exit
 					self.exit()
+
+	def exit(self):
+		"""Gracefully stop the API and exit the program."""
+		self.save_stats()
+		print("Saving and exiting...")
+
+		# Stop the API thread by sending a request to the shutdown endpoint
+		try:
+			requests.post("http://127.0.0.1:5000/shutdown")
+			print("API shutting down...")
+		except requests.exceptions.RequestException as e:
+			print(f"Failed to shutdown API: {e}")
+
+		# Wait for a moment to ensure all threads are cleaned up
+		time.sleep(1)
+		sys.exit()
 
 
 # Start Tamagotchi
