@@ -571,14 +571,12 @@ class Tamagotchi:
 
 	def give_medicine(self):
 		self.check_and_update_from_json()
-		self.give_medicine()
 		if self.health < 4:
 			print("Giving medicine...")
-			time.sleep(1)
 			self.health = 4
 		else:
 			print("At full health already...")
-			time.sleep(1)
+		time.sleep(1)
 		self.update_last_updated()
 		self.save_stats()
 
