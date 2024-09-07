@@ -524,7 +524,25 @@ class Tamagotchi:
 			self.print_sleeping()
 
 	# Action Methods
+	def check_and_update_from_json(self):
+		# Read the current stats from the JSON file and update the Tamagotchi instance
+		try:
+			with open('tamagotchi_stats.json', 'r') as file:
+				data = json.load(file)
+			self.health = data['health']
+			self.hunger = data['hunger']
+			self.happiness = data['happiness']
+			self.hygiene = data['hygiene']
+			self.age = data['age']
+			self.name = data['name']
+			self.sleeping = data['sleeping']
+		except FileNotFoundError:
+			print("Stats file not found.")
+		except json.JSONDecodeError:
+			print("Error reading the JSON file.")
+
 	def feed(self):
+		self.check_and_update_from_json()
 		if self.hunger < 4:
 			print("Feeding...")
 			time.sleep(1)
@@ -539,6 +557,7 @@ class Tamagotchi:
 		self.process_input()
 
 	def clean(self):
+		self.check_and_update_from_json()
 		print("Cleaning...")
 		time.sleep(1)
 		self.hygiene = 4
@@ -547,12 +566,14 @@ class Tamagotchi:
 		self.process_input()
 
 	def play(self):
+		self.check_and_update_from_json()
 		self.do_something_fun()
 		self.update_last_updated()
 		self.save_stats()
 		self.process_input()
 
 	def give_medicine(self):
+		self.check_and_update_from_json()
 		self.give_medicine()
 		if self.health < 4:
 			print("Giving medicine...")
