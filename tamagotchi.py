@@ -7,6 +7,7 @@ import datetime
 import platform
 import tweepy
 import threading
+from peach_api import TamagotchiAPI
 
 
 class Tamagotchi:
@@ -29,7 +30,7 @@ class Tamagotchi:
 	def __init__(self):
 		self.state = self.STATE_MENU
 		self.action = 1
-		self.name = ""  # Add this line to initialize the name variable
+		self.name = ""
 		self.health = 4
 		self.hunger = 4
 		self.happiness = 4
@@ -39,7 +40,9 @@ class Tamagotchi:
 		self.last_decay_time = self.get_current_time_ms()
 		self.creation_date_and_time = self.get_current_time_ms()
 		self.sleeping = self.is_sleeping()
-		self.last_updated = self.get_current_time_ms()  # Initialize last_updated
+		self.last_updated = self.get_current_time_ms()
+		self.api = TamagotchiAPI(self)  # Pass the current Tamagotchi instance to API
+		threading.Thread(target=self.api.start_api, daemon=True).start()  # Start API in another thread
 
 	def post_tweet(self, tweet):
 		# Bearer token
@@ -59,7 +62,7 @@ class Tamagotchi:
 		try:
 			response = client.create_tweet(text=tweet)
 		except Exception as e:
-			print(str(e))	# sys.exit()
+			print(str(e))  # sys.exit()
 
 	def load_tweets(self, filename):
 		# Load tweets from a JSON file and return them as a list.
@@ -116,7 +119,6 @@ class Tamagotchi:
 
 			print("Posted a tweet:", tweet)
 			self.happiness += 1
-			self.update_last_updated()
 			self.print_happiness_bar()
 			time.sleep(5)
 		else:
@@ -521,6 +523,49 @@ class Tamagotchi:
 		elif self.state == self.STATE_SLEEPING:
 			self.print_sleeping()
 
+	# Action Methods
+	def feed(self):
+		if self.hunger < 4:
+			print("Feeding...")
+			time.sleep(1)
+			self.hunger += 1
+			self.update_last_updated()
+		else:
+			print("Can't eat anymore...")
+			time.sleep(1)
+		self.print_hunger_bar()
+		self.update_last_updated()
+		self.save_stats()
+		self.process_input()
+
+	def clean(self):
+		print("Cleaning...")
+		time.sleep(1)
+		self.hygiene = 4
+		self.update_last_updated()
+		self.save_stats()
+		self.process_input()
+
+	def play(self):
+		self.do_something_fun()
+		self.update_last_updated()
+		self.save_stats()
+		self.process_input()
+
+	def give_medicine(self):
+		self.give_medicine()
+		if self.health < 4:
+			print("Giving medicine...")
+			time.sleep(1)
+			self.health = 4
+		else:
+			print("At full health already...")
+			time.sleep(1)
+		self.update_last_updated()
+		self.save_stats()
+		self.process_input()
+
+	# Process Input
 	def process_input(self):
 		if self.state != self.STATE_EXIT:
 			self.decay()
@@ -561,57 +606,31 @@ class Tamagotchi:
 
 			# FEED
 			if self.state == self.STATE_FEED:
-				if self.action == 1:  # 1. Give Food
-					if self.hunger < 4:
-						print("Feeding...")
-						time.sleep(1)
-						self.hunger += 1
-						self.update_last_updated()
-					else:
-						print("Can't eat anymore...")
-						time.sleep(1)
-					self.print_hunger_bar()
+				if self.action == 1:  # 1. Feed
+					self.feed()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
-				self.save_stats()
-				self.process_input()
 
 			# PLAY
 			if self.state == self.STATE_PLAY:
 				if self.action == 1:  # 1. Do something fun...
-					self.do_something_fun()
+					self.play()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
-				self.save_stats()
-				self.process_input()
 
 			# CLEAN
 			if self.state == self.STATE_CLEAN:
 				if self.action == 1:  # 1. Clean
-					print("Cleaning...")
-					time.sleep(1)
-					self.hygiene = 4
-					self.update_last_updated()
+					self.clean()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
-				self.save_stats()
-				self.process_input()
 
 			# MEDICINE
 			if self.state == self.STATE_MEDICINE:
 				if self.action == 1:  # 1. Give Medicine
-					if self.health < 4:
-						print("Giving medicine...")
-						time.sleep(1)
-						self.health = 4
-						self.update_last_updated()
-					else:
-						print("At full health already...")
-						time.sleep(1)
+					self.give_medicine()
 				if self.action == 2:  # 2. Back
 					self.state = self.STATE_MENU
-				self.save_stats()
-				self.process_input()
 
 			# DEATH
 			if self.state == self.STATE_DEATH:
