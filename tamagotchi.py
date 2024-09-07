@@ -561,6 +561,8 @@ class Tamagotchi:
 			if self.happiness < 4:
 				self.happiness += 1
 
+			time.sleep(5)
+
 		self.update_last_updated()
 		self.save_stats()
 
