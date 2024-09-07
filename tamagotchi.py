@@ -121,7 +121,8 @@ class Tamagotchi:
 			if not silent:
 				print("Posted a tweet:", tweet)
 			self.happiness += 1
-			self.print_happiness_bar()
+			if not silent:
+				self.print_happiness_bar()
 			time.sleep(5)
 		else:
 			print(default_tweet)
@@ -555,7 +556,8 @@ class Tamagotchi:
 			if not silent:
 				print("Can't eat anymore...")
 			time.sleep(1)
-		self.print_hunger_bar()
+		if not silent:
+			self.print_hunger_bar()
 		self.update_last_updated()
 		self.save_stats()
 
@@ -581,7 +583,8 @@ class Tamagotchi:
 				print("Giving medicine...")
 			self.health = 4
 		else:
-			print("At full health already...")
+			if not silent:
+				print("At full health already...")
 		time.sleep(1)
 		self.update_last_updated()
 		self.save_stats()
