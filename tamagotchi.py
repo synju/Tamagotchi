@@ -105,35 +105,6 @@ class Tamagotchi:
 
 		time.sleep(5)
 
-	def do_something_fun(self, silent=False):
-		default_tweet = "Having a great time with my Tamagotchi! #Tamagotchi #FunTimes"
-		if self.happiness < 4:
-			tweets = self.load_tweets("tweets.json")
-			if not tweets:  # Check if the list is empty
-				if not silent:
-					print("Posted a tweet:", default_tweet)
-			else:
-				tweet = random.choice(tweets)
-				# Start a new thread to post the tweet
-				tweet_thread = threading.Thread(target=self.post_tweet, args=(tweet,))
-				tweet_thread.start()
-				if not silent:
-					print("Posted a tweet:", tweet)
-			self.happiness += 1
-			if not silent:
-				self.print_happiness_bar()
-			time.sleep(5)
-		else:
-			if not silent:
-				print(default_tweet)
-			if self.happiness < 4:
-				self.happiness += 1
-				self.update_last_updated()
-			if not silent:
-				self.print_happiness_bar()
-			time.sleep(1)
-		self.save_stats()  # Add this line to save the stats after performing the action
-
 	def is_sleeping(self):
 		current_time = datetime.datetime.now().time()
 		return current_time >= datetime.time(21) or current_time < datetime.time(9)
@@ -550,15 +521,11 @@ class Tamagotchi:
 		if self.hunger < 4:
 			if not silent:
 				print("Feeding...")
-			time.sleep(1)
 			self.hunger += 1
-			self.update_last_updated()
 		else:
 			if not silent:
 				print("Can't eat anymore...")
-			time.sleep(1)
-		if not silent:
-			self.print_hunger_bar()
+		time.sleep(1)
 		self.update_last_updated()
 		self.save_stats()
 
@@ -566,14 +533,34 @@ class Tamagotchi:
 		self.check_and_update_from_json()
 		if not silent:
 			print("Cleaning...")
-		time.sleep(1)
 		self.hygiene = 4
+		time.sleep(1)
 		self.update_last_updated()
 		self.save_stats()
 
 	def play(self, silent=False):
 		self.check_and_update_from_json()
-		self.do_something_fun(silent)
+
+		default_tweet = "Having a great time with my Tamagotchi! #Tamagotchi #FunTimes"
+		if self.happiness < 4:
+			tweets = self.load_tweets("tweets.json")
+			if not tweets:  # Check if the list is empty
+				if not silent:
+					print("Posted a tweet:", default_tweet)
+			else:
+				tweet = random.choice(tweets)
+				# Start a new thread to post the tweet
+				tweet_thread = threading.Thread(target=self.post_tweet, args=(tweet,))
+				tweet_thread.start()
+				if not silent:
+					print("Posted a tweet:", tweet)
+			self.happiness += 1
+		else:
+			if not silent:
+				print("Posted a tweet:", default_tweet)
+			if self.happiness < 4:
+				self.happiness += 1
+
 		self.update_last_updated()
 		self.save_stats()
 
